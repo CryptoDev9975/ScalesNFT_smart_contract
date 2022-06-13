@@ -1179,8 +1179,8 @@ contract ScalesNFT is ERC721URIStorage, Ownable {
     uint256 public totalDroppedAmount;
     uint256 public totalMintedAmount = 0;
     
-
-    mapping ( address => uint256) public whitelisted;
+    mapping ( address => uint256 ) public whitelisted;
+    mapping ( address => uint256 ) public mintedAmount;
 
     event ownerRegisterOneUserToWhitelist ( address user );
     event ownerRemoveOneUserFromWhitelist ( address user );
@@ -1200,7 +1200,7 @@ contract ScalesNFT is ERC721URIStorage, Ownable {
     function mint () public {
         if ( msg.sender != owner() ) {
             require( whitelisted[msg.sender] == 1, "Mint : This user is not whitelisted");
-            require( balanceOf(msg.sender) + 1 <= max_mint_amount, "Mint : You already minted Maximum Mint Amount" );
+            require( mintedAmount[msg.sender] + 1 <= max_mint_amount, "Mint : You already minted Maximum Mint Amount" );
         }
         require(totalMintedAmount + 1 <= totalDroppedAmount, "Mint : NFTs on this drop are already minted");
         uint256 _tokenId;
@@ -1218,7 +1218,7 @@ contract ScalesNFT is ERC721URIStorage, Ownable {
         if ( msg.sender != owner() )
         {
             require ( whitelisted[to] == 1, "mintBatch ; Target user is not whitelisted");
-            require ( balanceOf(to) + amount <= max_mint_amount, "mintBatch : Target user can't take more than Mamimum Mint Amount" );
+            require ( mintedAmount[to] + amount <= max_mint_amount, "mintBatch : Target user can't take more than Mamimum Mint Amount" );
         }
         uint256[] memory tokenIds = new uint256[](amount);
         for ( uint256 i = 0; i < amount; i++ )
