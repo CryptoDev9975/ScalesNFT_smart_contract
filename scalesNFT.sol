@@ -1248,7 +1248,7 @@ contract ScalesNFT is ERC721URIStorage, Ownable {
             require(whitelisted[users[i]] == 0, "Batch Register To Whitelist : Some user of this input is already whitelisted");
         }
         for ( uint i = 0; i < users.length; i++ ) {
-            whitelisted[users[i]] == 1;
+            whitelisted[users[i]] = 1;
         }
         emit ownerRegisterSomeUsersToWhitelist( users );
     }
@@ -1258,7 +1258,7 @@ contract ScalesNFT is ERC721URIStorage, Ownable {
             require(whitelisted[users[i]] == 1, "Batch Remove From Whitelist : Some user of input have never been whitelisted");
         }
         for ( uint i = 0; i < users.length; i++ ) {
-            whitelisted[users[i]] == 0;
+            whitelisted[users[i]] = 0;
         }
         emit ownerRemoveSomeUsersFromWhitelist( users );
     }
