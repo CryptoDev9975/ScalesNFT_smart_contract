@@ -1211,7 +1211,7 @@ contract ScalesNFT is ERC721URIStorage, Ownable {
         emit userMintOneNFT(msg.sender, _tokenId);
     }
 
-    function mintBatch ( address to, uint256 amount, string memory _tokenURI) public {          // need to be changed
+    function mintBatch ( address to, uint256 amount) public {          // need to be changed
         require ( to != address(0), "mintBatch : You can't mint NFTs to zero address" );
         require ( amount > 0, "mintBatch : You need to mint at least one NFT" );
         require ( totalMintedAmount + amount <= totalDroppedAmount, "mintBatch : There are no enough NFTs in this drop");
@@ -1225,7 +1225,7 @@ contract ScalesNFT is ERC721URIStorage, Ownable {
         {
             tokenIds[i] = totalMintedAmount + 1;
             _mint( to, tokenIds[i] );
-            _setTokenURI(tokenIds[i], _tokenURI);                   // token URI need to be changed
+            _setTokenURI(tokenIds[i], tokenURI(tokenIds[i]));                   // token URI need to be changed
             totalMintedAmount++;
         }
         emit userMintSomeNFTs(to, tokenIds);
