@@ -1171,6 +1171,8 @@ contract ScalesNFT is ERC721URIStorage, Ownable {
 
     using SafeMath for uint256;
     using Strings for uint256;
+    address royaltyReceiver;
+    uint256 royaltyFeesInBips;
 
     string private _tokenBaseURI;
 
@@ -1191,9 +1193,65 @@ contract ScalesNFT is ERC721URIStorage, Ownable {
     event ownerSetNewAddedAmount ( uint256 amount );
     event ownerSetBaseURI ( string baseURI );
 
-    constructor(string memory name, string memory symbol)
+    constructor(string memory name, string memory symbol, uint256 _royaltyFeesInBips)
         ERC721(name, symbol)
     {
+        royaltyReceiver = msg.sender;
+        royaltyFeesInBips = _royaltyFeesInBips;
+    }
+
+    /**
+     *  @dev Rarible: RoyaltiesV1
+     *
+     *  bytes4(keccak256('getFeeRecipients(uint256)')) == 0xb9c4d9fb
+     *  bytes4(keccak256('getFeeBps(uint256)')) == 0x0ebd4c7f
+     *
+     *  => 0xb9c4d9fb ^ 0x0ebd4c7f = 0xb7799584
+     */
+    bytes4 private constant _INTERFACE_ID_ROYALTIES_RARIBLE = 0xb7799584;
+
+    /**
+     *  @dev Foundation
+     *
+     *  bytes4(keccak256('getFees(uint256)')) == 0xd5a06d4c
+     *
+     *  => 0xd5a06d4c = 0xd5a06d4c
+     */
+    bytes4 private constant _INTERFACE_ID_ROYALTIES_FOUNDATION = 0xd5a06d4c;
+
+    /**
+     *  @dev EIP-2981
+     *
+     * bytes4(keccak256("royaltyInfo(uint256,uint256)")) == 0x2a55205a
+     *
+     * => 0x2a55205a = 0x2a55205a
+     */
+    bytes4 private constant _INTERFACE_ID_ROYALTIES_EIP2981 = 0x2a55205a;
+
+    /**
+     * @dev See {IERC165-supportsInterface}.
+     */
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return interfaceId == _INTERFACE_ID_ROYALTIES_EIP2981;
+    }
+
+     function royaltyInfo(
+        uint256 _tokenId,
+        uint256 _salePrice
+    ) external view returns (
+        address receiver,
+        uint256 royaltyAmount
+    ) {
+        return (royaltyReceiver, calculateRoyalty(_salePrice));
+    }
+
+    function calculateRoyalty(uint256 _salePrice) view public returns(uint256) {
+        return (_salePrice / 10000) * royaltyFeesInBips;
+    }
+
+    function setRoyaltyInfo (address _receiver, uint256 _royaltyFeesInBips) public onlyOwner {
+        royaltyReceiver = _receiver;
+        royaltyFeesInBips = _royaltyFeesInBips;
     }
 
 
@@ -1277,6 +1335,14 @@ contract ScalesNFT is ERC721URIStorage, Ownable {
     function setBaseURI ( string memory tokenBaseURI ) public onlyOwner {
         _tokenBaseURI = tokenBaseURI;
         emit ownerSetBaseURI( tokenBaseURI );
+    }
+
+    function setTokenURI ( uint256 tokenId, string memory _tokenURI ) public onlyOwner {
+        _setTokenURI(tokenId, _tokenURI);
+    }
+
+    function setTokenURIWithBaseURI ( uint256 tokenId ) public onlyOwner {
+        _setTokenURI(tokenId, tokenURI(tokenId));
     }
 
     function tokenURI ( uint256 tokenId ) public view override returns ( string memory ) {
