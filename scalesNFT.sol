@@ -1208,6 +1208,7 @@ contract ScalesNFT is ERC721URIStorage, Ownable {
         _mint(msg.sender, _tokenId);
         _setTokenURI(_tokenId, tokenURI(_tokenId));                   // token URI need to be changed
         totalMintedAmount++;
+        mintedAmount[msg.sender]++;
         emit userMintOneNFT(msg.sender, _tokenId);
     }
 
@@ -1217,6 +1218,7 @@ contract ScalesNFT is ERC721URIStorage, Ownable {
         require ( totalMintedAmount + amount <= totalDroppedAmount, "mintBatch : There are no enough NFTs in this drop");
         if ( msg.sender != owner() )
         {
+            require ( msg.sender == to, "mintBatch : Target address must be your address because you are not the owner");
             require ( whitelisted[to] == 1, "mintBatch ; Target user is not whitelisted");
             require ( mintedAmount[to] + amount <= max_mint_amount, "mintBatch : Target user can't take more than Mamimum Mint Amount" );
         }
@@ -1228,6 +1230,9 @@ contract ScalesNFT is ERC721URIStorage, Ownable {
             _setTokenURI(tokenIds[i], tokenURI(tokenIds[i]));                   // token URI need to be changed
             totalMintedAmount++;
         }
+        if (msg.sender == to) {
+            mintedAmount[to] += amount;
+        }        
         emit userMintSomeNFTs(to, tokenIds);
     }
 
@@ -1294,9 +1299,7 @@ contract ScalesNFT is ERC721URIStorage, Ownable {
         return whitelisted[user] == 1;
     }
     
-
-
-
-
-    
+    function getMintedAmount(address user) public view returns ( uint256) {
+        return mintedAmount[user];
+    }
 }
